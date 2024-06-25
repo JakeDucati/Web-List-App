@@ -1,21 +1,21 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 // items load from json on server
 const items = [
-    { title: 'Cabbage', quant: 1 },
-    { title: 'Garlic', quant: 2 },
-    { title: 'Apple', quant: 3 },
+    { title: 'Cabbage', quant: 1, checked: true },
+    { title: 'Garlic', quant: 2, checked: false },
+    { title: 'Apple', quant: 3, checked: false },
 ];
 
-// List items component
-const ListItems = ({ items }) => {
+// list all items
+const ListItems = ({items}) => {
     return items.map(item => (
         <tr className="flex justify-between" key={item.title}>
             <td>
                 <label className="flex">
-                    <input type="checkbox" className="mr-4 scale-150" />
+                    <input type="checkbox" className="mr-4 scale-150" defaultChecked={item.checked} />
                     <span>{item.title}</span>
                 </label>
             </td>
@@ -29,29 +29,68 @@ const ListItems = ({ items }) => {
     ));
 };
 
-// Adding item inputs component
-function AddingItem() {
+// add item
+function AddingItem({itemNameInput}) {
+    const addItemTxt = (event) => {
+        if (event.key === "Enter") {
+            addItem();
+        }
+    }
+
+    const addItem = async () => {
+        const itemName = document.getElementById("itemName").value;
+        const itemQuant = parseInt(document.getElementById("itemQuant").value);
+
+        try {
+            const response = await fetch("/api/items", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({itemName, itemQuant}),
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to add item");
+            }
+
+            // handle success
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
     return (
-        <tr className="flex justify-between" key="addingItem">
+        <tr className="flex justify-between mb-4" key="addingItem">
             <td>
                 <label className="flex">
-                    <input type="text" placeholder="Item" className="bg-transparent outline outline-2 outline-offset-2" />
+                    <input id="itemName" type="text" placeholder="Item" ref={itemNameInput} onKeyDown={addItemTxt} className="bg-transparent outline-none border-b-2 border-white w-full" />
                 </label>
             </td>
             <td>
-                <input type="number" placeholder="Quantity" className="bg-transparent outline outline-2 outline-offset-2" min="1" value={1} />
+                <input id="itemQuant" type="number" placeholder="Quantity" onKeyDown={addItemTxt} className="bg-transparent outline-none border-b-2 border-white w-14" min="1" value={1} />
+            </td>
+            <td>
+                <button onClick={addItem} className="bg-slate-600 p-1 rounded-md">Add</button>
             </td>
         </tr>
     );
 }
 
-// Main page component
+// page
 export default function Home() {
     const [isAddingItem, setIsAddingItem] = useState(false);
+    const itemNameInput = useRef(null);
 
     const addItemInput = () => {
         setIsAddingItem(true);
     };
+
+    useEffect(() => {
+        if (isAddingItem && itemNameInput.current) {
+            itemNameInput.current.focus();
+        }
+    }, [isAddingItem]);
 
     return (
         <main className="flex-column p-3">
@@ -68,7 +107,7 @@ export default function Home() {
                         </tr>
                     </thead>
                     <tbody>
-                        {isAddingItem && <AddingItem />}
+                        {isAddingItem && <AddingItem itemNameInput={itemNameInput} />}
                         <ListItems items={items} />
                     </tbody>
                 </table>
