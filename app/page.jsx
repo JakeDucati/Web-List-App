@@ -3,11 +3,27 @@
 import React, { useState, useRef, useEffect } from 'react';
 
 // items load from json on server
-const items = [
-    { title: 'Cabbage', quant: 1, checked: true },
-    { title: 'Garlic', quant: 2, checked: false },
-    { title: 'Apple', quant: 3, checked: false },
-];
+// const items = [
+//     { title: 'Cabbage', quant: 1, checked: true },
+//     { title: 'Garlic', quant: 2, checked: false },
+//     { title: 'Apple', quant: 3, checked: false },
+// ];
+
+// fetch items
+const fetchItems = async () => {
+    try {
+        const response = await fetch('/api/items/fetch');
+        if (!response.ok) {
+            throw new Error('Failed to fetch items');
+        }
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error(error);
+        return [];
+    }
+};
+
 
 // list all items
 const ListItems = ({items}) => {
@@ -30,7 +46,7 @@ const ListItems = ({items}) => {
 };
 
 // add item
-function AddingItem({itemNameInput}) {
+function AddingItem({itemNameInput, setIsAddingItem }) {
     const addItemTxt = (event) => {
         if (event.key === "Enter") {
             addItem();
@@ -40,14 +56,15 @@ function AddingItem({itemNameInput}) {
     const addItem = async () => {
         const itemName = document.getElementById("itemName").value;
         const itemQuant = parseInt(document.getElementById("itemQuant").value);
+        const checked = false;
 
         try {
-            const response = await fetch("/api/items", {
+            const response = await fetch("/api/items/save", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({itemName, itemQuant}),
+                body: JSON.stringify({itemName, itemQuant, checked}),
             });
 
             if (!response.ok) {
@@ -55,8 +72,9 @@ function AddingItem({itemNameInput}) {
             }
 
             // handle success
+            setIsAddingItem(false);
         } catch (error) {
-            console.log(error);
+            console.log(error.message);
         }
     };
 
@@ -68,7 +86,7 @@ function AddingItem({itemNameInput}) {
                 </label>
             </td>
             <td>
-                <input id="itemQuant" type="number" placeholder="Quantity" onKeyDown={addItemTxt} className="bg-transparent outline-none border-b-2 border-white w-14" min="1" value={1} />
+                <input id="itemQuant" type="number" placeholder="Quantity" onKeyDown={addItemTxt} className="bg-transparent outline-none border-b-2 border-white w-14" min="1" defaultValue="1" />
             </td>
             <td>
                 <button onClick={addItem} className="bg-slate-600 p-1 rounded-md">Add</button>
@@ -79,8 +97,16 @@ function AddingItem({itemNameInput}) {
 
 // page
 export default function Home() {
+    const [items, setItems] = useState([]);
     const [isAddingItem, setIsAddingItem] = useState(false);
     const itemNameInput = useRef(null);
+
+    useEffect(() => {
+        const interval = setInterval(async () => {
+            const newItems = await fetchItems();
+            setItems(newItems);
+        }, 1000);
+    });
 
     const addItemInput = () => {
         setIsAddingItem(true);
@@ -107,7 +133,7 @@ export default function Home() {
                         </tr>
                     </thead>
                     <tbody>
-                        {isAddingItem && <AddingItem itemNameInput={itemNameInput} />}
+                        {isAddingItem && <AddingItem itemNameInput={itemNameInput} setIsAddingItem={setIsAddingItem} />}
                         <ListItems items={items} />
                     </tbody>
                 </table>
