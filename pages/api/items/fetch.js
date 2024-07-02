@@ -1,4 +1,3 @@
-import { NextResponse } from 'next/server';
 import fs from 'fs/promises';
 import path from 'path';
 
@@ -9,10 +8,10 @@ export default async function handler(req, res) {
         try {
             const jsonContent = await fs.readFile(JSON_FILE_PATH, 'utf-8');
             const items = JSON.parse(jsonContent);
-            return NextResponse.json(res, items);
+            res.status(200).json(items);
         } catch (error) {
             console.error('Error reading items:', error);
-            return NextResponse.json(res, { error: 'Failed to load items' }, { status: 500 });
+            res.status(500).json({ error: 'Failed to load items' });
         }
     } else {
         res.setHeader('Allow', ['GET']);

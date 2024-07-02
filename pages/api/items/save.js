@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 
-// path to the json file
+// path to the JSON file
 const JSON_FILE_PATH = path.join(process.cwd(), 'data', 'items.json');
 
 export default async function handler(req, res) {
@@ -9,17 +9,25 @@ export default async function handler(req, res) {
         const { itemName, itemQuant, checked } = req.body;
 
         try {
-            // read json
+            // read JSON file
             const jsonContent = await fs.readFile(JSON_FILE_PATH, 'utf-8');
             const currentItems = JSON.parse(jsonContent);
 
-            // append new item
-            currentItems.push({ title: itemName, quant: itemQuant, checked: checked });
+            // check if item exists (checking by item name)
+            const itemIndex = currentItems.findIndex(item => item.title === itemName);
+
+            if (itemIndex !== -1) {
+                // if item exists, replace it (and update quantity and checked state if needed)
+                currentItems[itemIndex] = { title: itemName, quant: itemQuant, checked: checked };
+            } else {
+                // if item doesnt exist, append it
+                currentItems.push({ title: itemName, quant: itemQuant, checked: checked });
+            }
 
             // write to file
             await fs.writeFile(JSON_FILE_PATH, JSON.stringify(currentItems, null, 2));
 
-            res.status(200).json({ message: 'Item added successfully' });
+            res.status(200).json({ message: 'Item added or updated successfully' });
         } catch (error) {
             console.error('Error adding item:', error);
             res.status(500).json({ error: 'Failed to add item' });

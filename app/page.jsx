@@ -2,12 +2,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 
-// items load from json on server
-// const items = [
-//     { title: 'Cabbage', quant: 1, checked: true },
-//     { title: 'Garlic', quant: 2, checked: false },
-//     { title: 'Apple', quant: 3, checked: false },
-// ];
 
 // fetch items
 const fetchItems = async () => {
@@ -31,7 +25,7 @@ const ListItems = ({items}) => {
         <tr className="flex justify-between" key={item.title}>
             <td>
                 <label className="flex">
-                    <input type="checkbox" className="mr-4 scale-150" defaultChecked={item.checked} />
+                    <input type="checkbox" className="mr-4 scale-150" defaultChecked={item.checked} /*onChange={itemCheck}*/ />
                     <span>{item.title}</span>
                 </label>
             </td>
@@ -95,6 +89,33 @@ function AddingItem({itemNameInput, setIsAddingItem }) {
     );
 }
 
+// item check / uncheck
+// const itemCheck = async () => {
+//     itemNameState = ;
+//     itemQuantState = ;
+//     checkState = this.value;
+
+//     try {
+//         const response = await fetch("/api/items/save", {
+//             method: "POST",
+//             headers: {
+//                 "Content-Type": "application/json",
+//             },
+//             body: JSON.stringify({itemNameState, itemQuantState, checkState}),
+//         });
+
+//         if (!response.ok) {
+//             throw new Error("Failed to add item");
+//         }
+
+//         // handle success
+        
+//     } catch (error) {
+//         console.log(error.message);
+//     }
+// }
+
+
 // page
 export default function Home() {
     const [items, setItems] = useState([]);
@@ -102,11 +123,16 @@ export default function Home() {
     const itemNameInput = useRef(null);
 
     useEffect(() => {
-        const interval = setInterval(async () => {
+        const fetchData = async () => {
             const newItems = await fetchItems();
             setItems(newItems);
-        }, 1000);
-    });
+        };
+
+        fetchData();
+        const interval = setInterval(fetchData, 2000);
+
+        return () => clearInterval(interval);
+    }, []);
 
     const addItemInput = () => {
         setIsAddingItem(true);
