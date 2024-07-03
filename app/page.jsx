@@ -20,24 +20,52 @@ const fetchItems = async () => {
 
 
 // list all items
-const ListItems = ({items}) => {
+const ListItems = ({ items, onItemCheck }) => {
     return items.map(item => (
         <tr className="flex justify-between" key={item.title}>
             <td>
                 <label className="flex">
-                    <input type="checkbox" className="mr-4 scale-150" defaultChecked={item.checked} /*onChange={itemCheck}*/ />
+                    <input type="checkbox" className="mr-4 scale-150" defaultChecked={item.checked} onChange={() => onItemCheck(item.title, item.quant, item.checked)} />
                     <span>{item.title}</span>
                 </label>
             </td>
             <td>
                 {item.quant}
-                <button className="ml-2">
+                <button className="ml-4">
                     <span className="material-symbols-outlined">delete</span>
                 </button>
             </td>
         </tr>
     ));
 };
+
+
+// update item check state (checked / unchecked)
+const itemCheck = async (itemNameState, itemQuantState, checkState) => {
+    const newCheckState = !checkState;
+
+    try {
+        const response = await fetch("/api/items/save", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ itemName: itemNameState, itemQuant: itemQuantState, checked: newCheckState }),
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to update item");
+        }
+
+        // Handle success
+        console.log("Checked / Unchecked Item");
+    } catch (error) {
+        console.log(error.message);
+    }
+};
+
+
+
 
 // add item
 function AddingItem({itemNameInput, setIsAddingItem }) {
@@ -89,31 +117,6 @@ function AddingItem({itemNameInput, setIsAddingItem }) {
     );
 }
 
-// item check / uncheck
-// const itemCheck = async () => {
-//     itemNameState = ;
-//     itemQuantState = ;
-//     checkState = this.value;
-
-//     try {
-//         const response = await fetch("/api/items/save", {
-//             method: "POST",
-//             headers: {
-//                 "Content-Type": "application/json",
-//             },
-//             body: JSON.stringify({itemNameState, itemQuantState, checkState}),
-//         });
-
-//         if (!response.ok) {
-//             throw new Error("Failed to add item");
-//         }
-
-//         // handle success
-        
-//     } catch (error) {
-//         console.log(error.message);
-//     }
-// }
 
 
 // page
@@ -144,6 +147,10 @@ export default function Home() {
         }
     }, [isAddingItem]);
 
+    const handleItemCheck = (itemName, itemQuant, checked) => {
+        itemCheck(itemName, itemQuant, checked);
+    };
+
     return (
         <main className="flex-column p-3">
             <div className="flex justify-between text-4xl p-4 pr-7 items-center bg-slate-800 rounded-lg mb-4">
@@ -160,7 +167,7 @@ export default function Home() {
                     </thead>
                     <tbody>
                         {isAddingItem && <AddingItem itemNameInput={itemNameInput} setIsAddingItem={setIsAddingItem} />}
-                        <ListItems items={items} />
+                        <ListItems items={items} onItemCheck={handleItemCheck} />
                     </tbody>
                 </table>
             </div>

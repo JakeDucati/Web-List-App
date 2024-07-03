@@ -1,7 +1,6 @@
 import fs from 'fs/promises';
 import path from 'path';
 
-// path to the JSON file
 const JSON_FILE_PATH = path.join(process.cwd(), 'data', 'items.json');
 
 export default async function handler(req, res) {

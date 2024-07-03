@@ -7,7 +7,7 @@
   {
     "title": "fsdfsdfsd",
     "quant": 1,
-    "checked": false
+    "checked": true
   },
   {
     "title": "fsdfsdsdf",
@@ -27,7 +27,7 @@
   {
     "title": "something",
     "quant": 1,
-    "checked": false
+    "checked": true
   },
   {
     "title": "another thing",
@@ -47,7 +47,7 @@
   {
     "title": "shelf",
     "quant": 54789578946,
-    "checked": false
+    "checked": true
   },
   {
     "title": "that",
@@ -56,6 +56,21 @@
   },
   {
     "title": "lolollololol",
+    "quant": 1,
+    "checked": true
+  },
+  {
+    "title": "some food",
+    "quant": 6,
+    "checked": false
+  },
+  {
+    "title": "taco",
+    "quant": 1,
+    "checked": false
+  },
+  {
+    "title": "shredded sharp cheddar",
     "quant": 1,
     "checked": false
   }
